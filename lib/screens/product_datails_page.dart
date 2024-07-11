@@ -1,10 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_supabase_store/main.dart';
 import 'package:flutter_supabase_store/models/product.dart';
 
-class ProductDetailsPage extends StatelessWidget {
+class ProductDetailsPage extends StatefulWidget {
   final Product product;
 
   const ProductDetailsPage({super.key, required this.product});
+
+  @override
+  _ProductDetailsPageState createState() => _ProductDetailsPageState();
+}
+
+class _ProductDetailsPageState extends State<ProductDetailsPage> {
+  late Product product;
+
+  @override
+  void initState() {
+    super.initState();
+    product = widget.product;
+    _incrementViewCount();
+  }
+
+  Future<void> _incrementViewCount() async {
+    await supabase
+        .from('products')
+        .update({'view_count': product.viewCount + 1})
+        .eq('id', product.id);
+  }
 
   @override
   Widget build(BuildContext context) {

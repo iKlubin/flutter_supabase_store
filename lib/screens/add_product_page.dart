@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_supabase_store/main.dart';
 import 'package:image_picker/image_picker.dart'; // Для выбора изображения
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:io';
@@ -33,7 +34,7 @@ class _AddProductPageState extends State<AddProductPage> {
   }
 
   Future<void> _fetchCategories() async {
-    final response = await Supabase.instance.client.from('categories').select();
+    final response = await supabase.from('categories').select();
     setState(() {
       _categories = List<Map<String, dynamic>>.from(response as List);
       if (_categories.isNotEmpty) {
@@ -82,21 +83,26 @@ class _AddProductPageState extends State<AddProductPage> {
 
     try {
       if (_imageFile != null) {
+        var name = '${DateTime.now().millisecondsSinceEpoch}.jpg';
         // Загрузка изображения в Supabase Storage
-        final storageResponse = await Supabase.instance.client
-            .storage
-            .from('products_images')
-            .upload(
-              '${DateTime.now().millisecondsSinceEpoch}.jpg', // Имя файла изображения
-              _imageFile!,
-              fileOptions: const FileOptions(upsert: true),
-            );
+        await supabase.storage
+          .from('products_images')
+          .upload(
+            name, // Имя файла изображения
+            _imageFile!,
+            fileOptions: const FileOptions(upsert: true),
+          );
 
+        final res = supabase
+          .storage
+          .from('products_images')
+          .getPublicUrl(name);
 
-        _imageUrl = storageResponse;
+        _imageUrl = res;
       }
       // Вставка данных о товаре в таблицу products
-      final response = await Supabase.instance.client.from('products').insert({
+      
+      final response = await supabase.from('products').insert({
         'name': name,
         'description': description,
         'extended_description': extendedDescription,
@@ -242,15 +248,7 @@ class _AddProductPageState extends State<AddProductPage> {
                 ElevatedButton(
                   onPressed: _addProduct,
                   child: const Text('Добавить товар'),
-                ),
-              if (_errorMessage != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 16),
-                  child: Text(
-                    _errorMessage!,
-                    style: const TextStyle(color: CupertinoColors.systemRed),
-                  ),
-                ),
+                )
             ],
           ),
         ),

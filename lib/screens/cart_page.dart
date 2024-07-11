@@ -15,29 +15,118 @@ class CartPage extends StatelessWidget {
       ),
       body: SafeArea(
         child: cart.items.isEmpty
-          ? const Center(child: Text('Ваша корзина пуста'))
-          : ListView.builder(
-              padding: const EdgeInsets.all(16.0),
-              itemCount: cart.items.length,
-              itemBuilder: (context, index) {
-                final product = cart.items[index];
-                return ProductCard(
-                  id: product.id,
-                  name: product.name,
-                  description: product.description,
-                  imageUrl: product.imageUrl,
-                  price: product.price,
-                  categoryID: product.categoryID,
-                  tags: product.tags,
-                  rating: product.rating,
-                  purchaseCount: product.purchaseCount,
-                  viewCount: product.viewCount,
-                  discount: product.discount,
-                  userId: product.userId,
-                  extendedDescription: '',
-                );
-              },
-            ),
+            ? const Center(child: Text('Ваша корзина пуста'))
+            : Column(
+                children: [
+                  Expanded(
+                    child: ListView.builder(
+                      padding: const EdgeInsets.all(16.0),
+                      itemCount: cart.items.length,
+                      itemBuilder: (context, index) {
+                        final cartItem = cart.items[index];
+                        final product = cartItem.product;
+                        return Card(
+                          elevation: 4.0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Row(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(12.0),
+                                  child: Image.network(
+                                    product.imageUrl,
+                                    fit: BoxFit.cover,
+                                    width: 100,
+                                    height: 100,
+                                  ),
+                                ),
+                                const SizedBox(width: 16.0),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        product.name,
+                                        style: const TextStyle(
+                                          fontSize: 16.0,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8.0),
+                                      Text(
+                                        '₽${product.price}',
+                                        style: const TextStyle(
+                                          fontSize: 16.0,
+                                          color: Colors.green,
+                                        ),
+                                      ),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              IconButton(
+                                                icon: const Icon(Icons.remove),
+                                                onPressed: () {
+                                                  cart.updateQuantity(product.id, cartItem.quantity - 1);
+                                                },
+                                              ),
+                                              Text('${cartItem.quantity}'),
+                                              IconButton(
+                                                icon: const Icon(Icons.add),
+                                                onPressed: () {
+                                                  cart.updateQuantity(product.id, cartItem.quantity + 1);
+                                                },
+                                              ),
+                                            ],
+                                          ),
+                                          IconButton(
+                                            icon: const Icon(Icons.delete, color: Colors.red),
+                                            onPressed: () {
+                                              cart.removeItem(product.id);
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          'Всего товаров: ${cart.totalItems}',
+                          style: const TextStyle(fontSize: 18.0),
+                        ),
+                        const SizedBox(height: 8.0),
+                        Text(
+                          'Общая сумма: ₽${cart.totalPrice}',
+                          style: const TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 16.0),
+                        ElevatedButton(
+                          onPressed: () {
+                            // Обработка оформления заказа
+                          },
+                          child: const Text('Оформить заказ'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
       ),
     );
   }
