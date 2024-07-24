@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_supabase_store/models/product.dart';
-import 'package:flutter_supabase_store/screens/product_datails_page.dart';
+import 'package:flutter_supabase_store/screens/product_details_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SearchPage extends StatefulWidget {

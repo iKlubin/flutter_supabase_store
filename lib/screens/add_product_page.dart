@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_supabase_store/main.dart';
 import 'package:image_picker/image_picker.dart'; // Для выбора изображения
