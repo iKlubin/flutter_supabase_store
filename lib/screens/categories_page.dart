@@ -24,6 +24,8 @@ class _CategoriesPageState extends State<CategoriesPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Категории'),
+        centerTitle: true,
+        elevation: 0,
       ),
       body: SafeArea(
         child: FutureBuilder<List<Map<String, dynamic>>>(

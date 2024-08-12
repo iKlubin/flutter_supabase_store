@@ -12,6 +12,8 @@ class CartPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Корзина'),
+        centerTitle: true,
+        elevation: 0,
       ),
       body: SafeArea(
         child: cart.items.isEmpty

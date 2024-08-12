@@ -59,7 +59,7 @@ class ProductCard extends StatelessWidget {
     );
   }
 
-   @override
+  @override
   Widget build(BuildContext context) {
     return Card(
       elevation: 4.0,
@@ -80,7 +80,7 @@ class ProductCard extends StatelessWidget {
                   imageUrl,
                   fit: BoxFit.cover,
                   width: double.infinity,
-                  height: 300, // Ограничьте высоту изображения
+                  height: 500, // Ограничьте высоту изображения
                 ),
               ),
             ),

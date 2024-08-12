@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_supabase_store/main.dart';
-import 'package:image_picker/image_picker.dart'; // Для выбора изображения
+import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:io';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
@@ -18,9 +18,9 @@ class _AddProductPageState extends State<AddProductPage> {
   final _descriptionController = TextEditingController();
   final _extendedDescriptionController = TextEditingController();
   final _priceController = TextEditingController();
-  final _tagsController = TextEditingController(); // Для ввода тегов
+  final _tagsController = TextEditingController();
   String? _imageUrl;
-  File? _imageFile; // Для хранения выбранного изображения
+  File? _imageFile;
   bool _isLoading = false;
   String? _errorMessage;
   List<Map<String, dynamic>> _categories = [];
@@ -33,28 +33,32 @@ class _AddProductPageState extends State<AddProductPage> {
   }
 
   Future<void> _fetchCategories() async {
-    final response = await supabase.from('categories').select();
-    setState(() {
-      _categories = List<Map<String, dynamic>>.from(response as List);
-      if (_categories.isNotEmpty) {
-        _selectedCategoryId = _categories[0]['id'].toString();
-      }
-    });
+    try {
+      final response = await supabase.from('categories').select();
+      setState(() {
+        _categories = List<Map<String, dynamic>>.from(response as List);
+        if (_categories.isNotEmpty) {
+          _selectedCategoryId = _categories[0]['id'].toString();
+        }
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Ошибка загрузки категорий: $e')),
+      );
+    }
   }
 
-  // Функция для выбора изображения из галереи
   Future<void> _pickImage() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
-      final compressedImage = await _compressImage(pickedFile.path); // Сжимаем изображение
+      final compressedImage = await _compressImage(pickedFile.path);
       setState(() {
         _imageFile = File(compressedImage.path);
       });
     }
   }
-  
-  // Функция для сжатия изображения
+
   Future<XFile> _compressImage(String imagePath) async {
     final compressedImage = await FlutterImageCompress.compressAndGetFile(
       imagePath,
@@ -63,7 +67,7 @@ class _AddProductPageState extends State<AddProductPage> {
     );
     return compressedImage!;
   }
-  
+
   Future<void> _addProduct() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -82,25 +86,15 @@ class _AddProductPageState extends State<AddProductPage> {
 
     try {
       if (_imageFile != null) {
-        var name = '${DateTime.now().millisecondsSinceEpoch}.jpg';
-        // Загрузка изображения в Supabase Storage
+        final imageName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
         await supabase.storage
-          .from('products_images')
-          .upload(
-            name, // Имя файла изображения
-            _imageFile!,
-            fileOptions: const FileOptions(upsert: true),
-          );
-
-        final res = supabase
-          .storage
-          .from('products_images')
-          .getPublicUrl(name);
-
+            .from('products_images')
+            .upload(imageName, _imageFile!, fileOptions: const FileOptions(upsert: true));
+        
+        final res = supabase.storage.from('products_images').getPublicUrl(imageName);
         _imageUrl = res;
       }
-      // Вставка данных о товаре в таблицу products
-      
+
       final response = await supabase.from('products').insert({
         'name': name,
         'description': description,
@@ -108,13 +102,13 @@ class _AddProductPageState extends State<AddProductPage> {
         'price': price,
         'image_url': _imageUrl,
         'category_id': _selectedCategoryId,
-        'tags': tags, // Добавляем теги в запрос
+        'tags': tags,
       });
 
       if (response.error != null) {
         throw response.error!;
       }
-      // Успешная вставка, сбрасываем состояние и закрываем страницу
+
       _formKey.currentState!.reset();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Товар успешно добавлен!')),
@@ -136,11 +130,13 @@ class _AddProductPageState extends State<AddProductPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Добавить товар'),
+        centerTitle: true,
+        elevation: 0,
       ),
       body: SafeArea(
-        child: Form( // Используем Form для удобства валидации
+        child: Form(
           key: _formKey,
-          child: ListView( // Используем ListView для предотвращения переполнения
+          child: ListView(
             padding: const EdgeInsets.all(16.0),
             children: [
               TextFormField(
@@ -207,12 +203,11 @@ class _AddProductPageState extends State<AddProductPage> {
                 ),
               ),
               const SizedBox(height: 16),
-              // Выбор изображения
               _imageFile != null
                   ? Image.file(_imageFile!, height: 200)
                   : const SizedBox(height: 200),
               ElevatedButton(
-                onPressed: _pickImage, 
+                onPressed: _pickImage,
                 child: const Text('Выбрать изображение'),
               ),
               const SizedBox(height: 16),
@@ -247,7 +242,16 @@ class _AddProductPageState extends State<AddProductPage> {
                 ElevatedButton(
                   onPressed: _addProduct,
                   child: const Text('Добавить товар'),
-                )
+                ),
+              if (_errorMessage != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 16.0),
+                  child: Text(
+                    _errorMessage!,
+                    style: const TextStyle(color: Colors.red),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
             ],
           ),
         ),
@@ -261,7 +265,7 @@ class _AddProductPageState extends State<AddProductPage> {
     _descriptionController.dispose();
     _extendedDescriptionController.dispose();
     _priceController.dispose();
-    _tagsController.dispose(); 
+    _tagsController.dispose();
     super.dispose();
   }
 }

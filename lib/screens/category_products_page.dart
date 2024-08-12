@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_supabase_store/models/product.dart';
-import 'package:flutter_supabase_store/screens/product_details_page.dart';
+import 'package:flutter_supabase_store/widgets/product_card.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class CategoryProductsPage extends StatefulWidget {
   final String categoryId;
-  final String categoryName; // Добавим имя категории для AppBar
+  final String categoryName;
 
   const CategoryProductsPage({super.key, required this.categoryId, required this.categoryName});
 
@@ -64,73 +64,23 @@ class _CategoryProductsPageState extends State<CategoryProductsPage> {
             itemBuilder: (context, index) {
               final product = Product.fromJson(products[index]);
               return ProductCard(
-                product: product, // Передаем объект Product в ProductCard
-              );
+                          id: product.id,
+                          name: product.name,
+                          description: product.description,
+                          extendedDescription: product.extendedDescription,
+                          imageUrl: product.imageUrl,
+                          price: product.price,
+                          categoryID: product.categoryID,
+                          tags: product.tags,
+                          rating: product.rating,
+                          purchaseCount: product.purchaseCount,
+                          viewCount: product.viewCount,
+                          discount: product.discount,
+                          userId: product.userId,
+                        );
             },
           );
         },
-      ),
-    );
-  }
-}
-
-// Пример виджета ProductCard (вы можете настроить его по своему усмотрению)
-class ProductCard extends StatelessWidget {
-  final Product product;
-
-  const ProductCard({super.key, required this.product});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      clipBehavior: Clip.antiAlias, // Обрезаем контент по краям карточки
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10.0), // Закругленные углы карточки
-      ),
-      child: InkWell( // Добавляем InkWell для эффекта нажатия
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ProductDetailsPage(product: product),
-            ),
-          );
-        },
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Hero(
-              tag: product.id,
-              child: Image.network(
-                product.imageUrl,
-                height: 400.0, 
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    product.name,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 4.0),
-                  Text(
-                    '\$${product.price.toStringAsFixed(2)}', 
-                    style: const TextStyle(
-                      color: Colors.green,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

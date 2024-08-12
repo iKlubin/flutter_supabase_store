@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_supabase_store/models/product.dart';
 import 'package:flutter_supabase_store/screens/product_details_page.dart';
+import 'package:flutter_supabase_store/widgets/product_card.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SearchPage extends StatefulWidget {
@@ -43,6 +44,8 @@ class _SearchPageState extends State<SearchPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Поиск товаров'),
+        centerTitle: true,
+        elevation: 0,
       ),
       body: Column(
         children: [
@@ -67,25 +70,43 @@ class _SearchPageState extends State<SearchPage> {
                 ? const Center(
                     child: Text('Начните вводить запрос для поиска'),
                   )
-                : ListView.builder(
+                : GridView.builder(
+                    padding: const EdgeInsets.all(16.0),
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 1, // Adjust this for different layouts
+                      mainAxisSpacing: 16.0,
+                      crossAxisSpacing: 16.0,
+                      childAspectRatio: 0.75,
+                    ),
                     itemCount: _searchResults.length,
                     itemBuilder: (context, index) {
-                      final product = _searchResults[index];
-                      return ListTile(
+                      final product = Product.fromJson(_searchResults[index]);
+                      return GestureDetector(
                         onTap: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) =>
-                                  ProductDetailsPage(product: Product.fromJson(product)), 
+                              builder: (context) => ProductDetailsPage(product: product), 
                             ),
                           );
                         },
-                        leading: product['image_url'] != null
-                            ? Image.network(product['image_url'])
-                            : const Icon(Icons.image),
-                        title: Text(product['name']),
-                        subtitle: Text('\$${product['price'].toStringAsFixed(2)}'),
+                        child: ProductCard(
+                          id: product.id,
+                          name: product.name,
+                          description: product.description,
+                          extendedDescription: product.extendedDescription,
+                          imageUrl: product.imageUrl,
+                          price: product.price,
+                          categoryID: product.categoryID,
+                          tags: product.tags,
+                          rating: product.rating,
+                          purchaseCount: product.purchaseCount,
+                          viewCount: product.viewCount,
+                          discount: product.discount,
+                          userId: product.userId,
+                        ),
                       );
                     },
                   ),

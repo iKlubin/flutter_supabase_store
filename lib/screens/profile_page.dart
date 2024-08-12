@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_supabase_store/main.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -12,12 +13,13 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> _signOut() async {
     try {
       await Supabase.instance.client.auth.signOut();
-      // After signing out, navigate to login or another appropriate screen
-      Navigator.pushReplacementNamed(context, '/login'); 
+      Navigator.pushReplacementNamed(context, '/login');
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Произошла ошибка при выходе из аккаунта.'),
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Произошла ошибка при выходе из аккаунта.'),
+        ),
+      );
     }
   }
 
@@ -26,6 +28,8 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Профиль'),
+        centerTitle: true,
+        elevation: 0,
       ),
       body: Center(
         child: StreamBuilder<AuthState>(
@@ -39,37 +43,98 @@ class _ProfilePageState extends State<ProfilePage> {
               final Session? session = snapshot.data!.session;
 
               if (data == AuthChangeEvent.signedIn && session != null) {
-                // User is authenticated
-                return Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text('Email: ${session.user.email}'),
-                    const SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: _signOut, 
-                      child: const Text('Выйти из аккаунта'),
-                    ),
-                  ],
+                return Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      CircleAvatar(
+                        radius: 50,
+                        backgroundColor: Colors.blueAccent,
+                        child: Text(
+                          session.user.email![0].toUpperCase(),
+                          style: const TextStyle(
+                            fontSize: 40,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        session.user.email!,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 40),
+                      ElevatedButton.icon(
+                        onPressed: _signOut,
+                        icon: const Icon(Icons.logout, color: Colors.white),
+                        label: const Text('Выйти из аккаунта'),
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size.fromHeight(50),
+                          backgroundColor: Colors.redAccent, // Corrected parameter
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          textStyle: const TextStyle(
+                            fontSize: 18.0,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 );
               } else {
-                // User is not authenticated
-                return Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.pushNamed(context, '/login');
-                      },
-                      child: const Text('Войти'),
-                    ),
-                    const SizedBox(height: 16),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pushNamed(context, '/registration');
-                      },
-                      child: const Text('Зарегистрироваться'),
-                    ),
-                  ],
+                return Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.account_circle,
+                        size: 100,
+                        color: Colors.grey,
+                      ),
+                      const SizedBox(height: 20),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/login');
+                        },
+                        icon: const Icon(Icons.login, color: Colors.white),
+                        label: const Text('Войти'),
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size.fromHeight(50),
+                          backgroundColor: Colors.blueAccent, // Corrected parameter
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          textStyle: const TextStyle(
+                            fontSize: 18.0,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/registration');
+                        },
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.blueAccent, // Corrected parameter
+                          textStyle: const TextStyle(
+                            fontSize: 18.0,
+                          ),
+                        ),
+                        child: const Text('Зарегистрироваться'),
+                      ),
+                    ],
+                  ),
                 );
               }
             }
