@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_supabase_store/main.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProfilePage extends StatefulWidget {
